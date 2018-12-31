@@ -23,7 +23,7 @@ class KNN:
         distances, neighbors = [], []
         for i in range(len(self.train_feature)):
             distance = self.euclidean_distance(test_set, self.train_feature[i])
-            tmp = self.train_feature[i].copy()
+            tmp = list(self.train_feature[i].copy())
             tmp.append(self.train_label[i])
             distances.append((tmp, distance))
 

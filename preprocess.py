@@ -1,7 +1,8 @@
 import random
+import numpy as np
 
 class Preprocess:
-    
+
     def read_csv(self, filepath, header=True):
         dataset = []
         read = open(filepath, "r")
@@ -72,3 +73,18 @@ class Preprocess:
                 y_test.append(test[i][0])
 
         return(X_train, y_train, X_test, y_test)
+
+    def normalise_data(self, data):
+        temp = np.array(data)
+        data_copy = temp.copy()
+
+        rows = temp.shape[0]
+        cols = temp.shape[1]
+        for i in range(cols):
+            col_max = np.amax(temp[:, i])
+            col_min = np.amin(temp[:, i])
+
+            for j in range(rows):
+                data_copy[j, i] = (temp[j, i] - col_min) / (col_max - col_min)
+
+        return data_copy
