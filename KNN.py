@@ -11,7 +11,7 @@ class KNN:
     def euclidean_distance(self, point1, point2):
         total = 0
         for i in range(len(point1)-1):
-            total = total + pow(point1[i] + point2[i], 2)
+            total = total + pow((point1[i] - point2[i]), 2)
 
         return math.sqrt(total)
 
@@ -22,12 +22,12 @@ class KNN:
     def k_neighbors(self, test_set):
         distances, neighbors = [], []
         for i in range(len(self.train_feature)):
-            distance = self.euclidean_distance(test_set, self.train_feature[i])
+            distance = self.euclidean_distance(self.train_feature[i], test_set)
             tmp = list(self.train_feature[i].copy())
             tmp.append(self.train_label[i])
             distances.append((tmp, distance))
 
-        #sort the distances from closest to farthest
+        #sort the distances from closest to farthest     
         distances = sorted(distances, key=lambda tup: tup[1])
 
         #pick k neighbors
@@ -36,12 +36,12 @@ class KNN:
 
         #iterate through neighbors and assign label
         votes = {}
-        for item in neighbors:
-            i = item[0][-1]
-            if i in votes:
-                votes[i] += 1
+        for i in range(len(neighbors)):
+            clas = neighbors[i][0][-1]
+            if clas in votes:
+                votes[clas] += 1
             else:
-                votes[i] = 1
+                votes[clas] = 1
         
         highest_vote = 0
         label = None
@@ -54,8 +54,8 @@ class KNN:
 
     def predict(self, test_feature):
         predicted_label = []
-        for each in test_feature:
-            label = self.k_neighbors(each)
+        for i in range(len(test_feature)):
+            label = self.k_neighbors(test_feature[i])
             predicted_label.append(label)
         
         return predicted_label
@@ -76,7 +76,7 @@ class KNNEnsemble(KNN):
         train = []
 
         #combine feature and label 
-        temp = list(self.train_feature)
+        temp = (self.train_feature.copy()).tolist()
         for i in range(len(temp)):
             temp[i].append(self.train_label[i])
             train.append(temp[i])
@@ -112,6 +112,7 @@ class KNNEnsemble(KNN):
                     X_train.append(feat)
                     y_train.append(sample[i][0])
 
+            X_train = np.array(X_train)
             #fit to knn classifier
             knn = KNN(self.k)
             knn.fit(X_train, y_train)
