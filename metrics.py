@@ -27,7 +27,7 @@ class Metrics:
         diagonals_sum = np.trace(conf_matrix)
         total = sum(conf_matrix.sum(axis = 1))
         accuracy = diagonals_sum/total
-        accuracy = round(accuracy*100, 2)
+        accuracy = round(accuracy, 2)
         self.accu = accuracy
         return accuracy
 
@@ -35,7 +35,7 @@ class Metrics:
         diagonals_sum = np.trace(conf_matrix)
         total = sum(conf_matrix.sum(axis = 1))
         error = (1 - (diagonals_sum/total))
-        error = round(error, 4)
+        error = round(error, 3)
         return error
 
     def precision(self, conf_matrix):
@@ -43,7 +43,7 @@ class Metrics:
 
         for i in range(conf_matrix.shape[0]):
             tp = conf_matrix[i, i]
-            tpfn = sum(np.sum(conf_matrix, axis=0)[i])
+            tpfn = np.sum(conf_matrix, axis=0)[i]
             precision = tp/tpfn
             precisions.append(precision)
 
@@ -57,7 +57,7 @@ class Metrics:
 
         for i in range(conf_matrix.shape[0]):
             tp = conf_matrix[i, i]
-            tpfp = sum(np.sum(conf_matrix, axis=1)[i])
+            tpfp = np.sum(conf_matrix, axis=1)[i]
             recall = tp/tpfp
             recalls.append(recall)
 
@@ -66,7 +66,21 @@ class Metrics:
         self.recal = average_recall
         return round(average_recall, 3)
 
+    #binary classifier
+    def sensitivity(self, conf_matrix):
+        tp = conf_matrix[0, 0]
+        fn = conf_matrix[1, 0]
+        sensi = tp/(tp+fn)
+        return round(sensi, 3)
+
+    #binary classifier
+    def specificity(self, conf_matrix):
+        tn = conf_matrix[1, 1]
+        fp = conf_matrix[0, 1]
+        specifi = tn/(tn+fp)
+        return round(specifi, 3)
+
     def f_score(self):
         f1_score = 2*((self.preci*self.recal)/(self.preci+self.recal))
-        return f1_score
+        return round(f1_score, 3)
     

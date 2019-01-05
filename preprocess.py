@@ -22,6 +22,28 @@ class Preprocess:
             read.close()
         return dataset
 
+    #read breast cancer data - this is separate because ID is deleted from the data
+    def read_breast_cancer_data(self, filepath, header=True):
+        dataset = []
+        read = open(filepath, "r")
+        content = read.readlines()
+
+        if(len(content) == 0):
+                return
+        else:
+            if header == True:
+                for line in range(1, len(content)):
+                    row = content[line].rstrip().split(',')
+                    dataset.append(row[1:len(row)])
+            elif header == False:
+                for line in range(len(content)):
+                    row = content[line].rstrip().split(',')
+                    if len(row) > 1:
+                        dataset.append(row[1:len(row)])
+            read.close()
+        return dataset
+
+
     #Split into train and test set
     def split_data(self, data, label_pos, ratio=0.3):
         train, test = [], []
@@ -85,6 +107,9 @@ class Preprocess:
             col_min = np.amin(temp[:, i])
 
             for j in range(rows):
-                data_copy[j, i] = (temp[j, i] - col_min) / (col_max - col_min)
+                if col_max == 0 and col_min == 0:
+                    data_copy[j, i] = 0
+                else:
+                    data_copy[j, i] = (temp[j, i] - col_min) / (col_max - col_min)
 
         return data_copy
