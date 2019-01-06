@@ -61,6 +61,11 @@ class Preprocess:
             train.append(item)
             del data[index]
         
+        X_train, y_train, X_test, y_test =  self.seprate_feat_label(train, test, label_pos)
+
+        return(X_train, y_train, X_test, y_test)
+
+    def seprate_feat_label(self, train, test, label_pos):
         X_train, y_train, X_test, y_test = [], [], [], []
 
         if label_pos == -1:
@@ -77,8 +82,7 @@ class Preprocess:
                 feat = [float(i) for i in feat]
                 X_test.append(feat)
                 y_test.append(test[i][-1])
-
-
+        
         elif label_pos == 0:
             for i in range(len(train)):
                 feat = train[i]
@@ -93,11 +97,11 @@ class Preprocess:
                 feat = [float(i) for i in feat]
                 X_test.append(feat)
                 y_test.append(test[i][0])
-
-        return(X_train, y_train, X_test, y_test)
+            
+        return (X_train, y_train, X_test, y_test)
 
     def normalise_data(self, data):
-        temp = np.array(data)
+        temp = np.array(data, dtype=float)
         data_copy = temp.copy()
 
         rows = temp.shape[0]
@@ -105,11 +109,12 @@ class Preprocess:
         for i in range(cols):
             col_max = np.amax(temp[:, i])
             col_min = np.amin(temp[:, i])
-
             for j in range(rows):
                 if col_max == 0 and col_min == 0:
                     data_copy[j, i] = 0
-                else:
+                elif (col_max - col_min) == 0:
+                    data_copy[j, i] = col_max
+                else:                        
                     data_copy[j, i] = (temp[j, i] - col_min) / (col_max - col_min)
 
         return data_copy

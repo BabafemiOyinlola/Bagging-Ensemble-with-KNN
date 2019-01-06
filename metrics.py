@@ -1,4 +1,7 @@
 import numpy as np
+from preprocess import *
+import random
+from KNN import *
 
 class Metrics:
     def confusion_matrix(self, y_test, y_pred):
@@ -84,3 +87,70 @@ class Metrics:
         f1_score = 2*((self.preci*self.recal)/(self.preci+self.recal))
         return round(f1_score, 3)
     
+    def k_foldcross_validation(self, data, label_pos, K, n_estimator, n=10):
+        #shuffle data
+        random.shuffle(data)
+
+        each_set_num = int(len(data)/n)
+        
+        #for each iteration in n, pick one in sets as test data and combine the rest as training data
+        preprocess = Preprocess()
+        
+        accuracies = []
+        precisions = []
+        recalls = []
+        errors = []
+        fs = []
+        specificities = []
+
+        for i in range(n):
+            test = []
+
+            if i == 0:
+                start_index = 0
+                end_index = each_set_num
+
+            n = start_index
+            data_copy = data.copy()
+
+            for n in range(start_index, end_index):
+                # n = start_index
+                item = data_copy[n]
+                test.append(item)
+                del data_copy[n]
+
+            train = data_copy
+            start_index = end_index
+            end_index = end_index + each_set_num
+
+            #seperate feat and label
+            X_train, y_train, X_test, y_test = preprocess.seprate_feat_label(train, test, label_pos)  
+            X_train = np.array(preprocess.normalise_data(X_train))
+            X_test = np.array(preprocess.normalise_data(X_test))         
+       
+            knn_ensemble = KNNEnsemble("bagging", K)
+            knn_ensemble.fit(X_train, y_train)
+            voted_pred = knn_ensemble.bagging(X_test, -1, bags=n_estimator)
+            conf_matrix = self.confusion_matrix(y_test, voted_pred)
+            accuracy = self.accuracy(conf_matrix)
+            error = self.error(conf_matrix)
+            precision = self.precision(conf_matrix)
+            recall = self.recall(conf_matrix)
+            fsc = self.f_score()
+            specifici = self.specificity(conf_matrix)
+
+            accuracies.append(accuracy)
+            precisions.append(precision)
+            recalls.append(recall)
+            errors.append(error)
+            fs.append(fsc)
+            specificities.append(specifici)
+
+        metrics = [accuracies, precisions, recalls, errors, fs, specificities]
+
+        return metrics
+
+
+
+
+
