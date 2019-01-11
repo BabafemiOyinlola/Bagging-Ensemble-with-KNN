@@ -38,7 +38,7 @@ class ScikitLearn:
         pre= precision_recall_fscore_support(y_test, y_pred, average="weighted")
         return(accuracy, conf_matrix, pre)
 
-    def k_foldcross_validation(self, data,label_pos, K, n_est, n=10):
+    def k_foldcross_validation(self, data, label_pos, K, n_est, n=10):
         k_fold = KFold(n_splits=n, shuffle=True, random_state=0)
         bag_clf = BaggingClassifier(KNeighborsClassifier(n_neighbors=K), bootstrap=True, n_estimators=n_est)      
 

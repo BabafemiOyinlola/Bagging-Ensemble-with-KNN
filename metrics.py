@@ -92,7 +92,6 @@ class Metrics:
         random.shuffle(data)
 
         each_set_num = int(len(data)/n)
-        
         #for each iteration in n, pick one in sets as test data and combine the rest as training data
         preprocess = Preprocess()
         
@@ -110,14 +109,16 @@ class Metrics:
                 start_index = 0
                 end_index = each_set_num
 
-            n = start_index
+            m = start_index
             data_copy = data.copy()
 
-            for n in range(start_index, end_index):
+            for m in range(start_index, end_index):
+                if m >= len(data_copy):
+                    break
                 # n = start_index
-                item = data_copy[n]
+                item = data_copy[m]
                 test.append(item)
-                del data_copy[n]
+                del data_copy[m]
 
             train = data_copy
             start_index = end_index
