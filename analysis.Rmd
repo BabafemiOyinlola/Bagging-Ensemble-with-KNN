@@ -170,7 +170,6 @@ t.test(iono_final_clf_scr_df$Error, iono_final_clf_lib_df$Error, var.equal = TRU
 ```
 
 
-
 ```{r}
 iono_base_metrics_df <- data.frame(iono_final_clf_scr)
 iono_lib_metrics_df <- data.frame(iono_final_clf_lib)
@@ -198,3 +197,87 @@ bc_av_pre_lib <- mean(bc_lib_metrics_df$Precision)
 bc_av_rec_lib <- mean(bc_lib_metrics_df$Recall)
 bc_av_speci_lib <- mean(bc_lib_metrics_df$Specificity)
 ```
+
+```{r}
+#Precision - Recall (PR) Curve - Ionosphere 
+iono_PR_data <- data.frame(
+  "pre scr" = iono_base_metrics_df$Precision,
+  "rec scr" = iono_base_metrics_df$Recall,
+  "pre lib" = iono_lib_metrics_df$Precision,
+  "rec lib" = iono_lib_metrics_df$Recall
+)
+PR_Iono <- ggplot(iono_PR_data) +
+        geom_line(aes(x = rec.scr, y = pre.scr, colour = "#5F9EA0")) +
+        geom_line(aes(y = pre.lib, x = rec.lib, colour = "#E1B378")) +
+        ggtitle("Precision Recall Curve - Ionosphere Data") +
+        labs(x="Recall", y="Precision")+
+        scale_x_continuous(breaks=seq(0,1,0.1))+
+        theme(plot.title = element_text(hjust = 0.5))+
+        theme(legend.position="bottom", legend.direction="horizontal",
+        legend.title = element_blank())+
+        scale_color_manual(labels = c("Scratch", "Library"), 
+                           values = c("#5F9EA0", "#E1B378"))
+
+PR_Iono
+```
+
+```{r}
+#Precision - Recall (PR) Curve
+bc_PR_data <- data.frame(
+  "pre scr" = bc_base_metrics_df$Precision,
+  "rec scr" = bc_base_metrics_df$Recall,
+  "pre lib" = bc_lib_metrics_df$Precision,
+  "rec lib" = bc_lib_metrics_df$Recall
+)
+
+PR_bc <- ggplot(bc_PR_data) +
+        geom_line(aes(y = pre.scr, x = rec.scr, colour = "#5F9EA0")) +
+        geom_line(aes(y = pre.lib, x = rec.lib, colour = "#E1B378")) +
+        ggtitle("Precision Recall Curve - Breast Cancer Wisconsin Data") +
+        labs(x="Recall", y="Precision")+
+        theme(plot.title = element_text(hjust = 0.5))+
+        theme(legend.position="bottom", legend.direction="horizontal",
+        legend.title = element_blank())+
+        scale_color_manual(labels = c("Scratch", "Library"), 
+                           values = c("#5F9EA0", "#E1B378"))
+
+PR_bc 
+```
+
+```{r}
+library(pROC)
+pred_test_Iono_scr <- read.csv("Ionosphere-Scratch-PR-ROC.csv", header = TRUE)
+pred_test_Iono_scr <- pred_test_Iono_scr[1:2]
+
+pred_test_Iono_lib <- read.csv("Ionosphere-Lib-PR-ROC.csv", header = TRUE)
+pred_test_Iono_lib <- pred_test_Iono_lib[1:2]
+
+pred_test_bc_scr <- read.csv("Breast Cancer-Scratch-PR-ROC.csv", header = TRUE)
+pred_test_bc_scr <- pred_test_bc_scr[1:2]
+
+pred_test_bc_lib <- read.csv("Breast Cancer-Lib-PR-ROC.csv", header = TRUE)
+pred_test_bc_lib <- pred_test_bc_scr[1:2]
+
+Iono_scr_roc <- roc(pred_test_Iono_scr$prediction, pred_test_Iono_scr$test)
+Iono_lib_roc <- roc(pred_test_Iono_lib$prediction, pred_test_Iono_lib$test)
+
+bc_scr_roc <- roc(pred_test_bc_scr$prediction, pred_test_bc_scr$test)
+bc_lib_roc <- roc(pred_test_bc_lib$prediction, pred_test_bc_lib$test)
+
+# Multiple curves:
+ROC <- ggroc(list(Iono.Scratch=Iono_scr_roc, Iono.Lib=Iono_lib_roc, 
+                  BC.Scratch=bc_scr_roc, BC.Lib=bc_lib_roc))
+
+ROC
+```
+
+```{r}
+PR_Iono_scr <- plot(precision ~ recall, t(coords(Iono_scr_roc, "all", ret = c("recall", "precision"))), type="l", main = "PR plot of classifier from scratch - Ionosphere dataset")
+
+PR_Iono_lib <- plot(precision ~ recall, t(coords(Iono_lib_roc, "all", ret = c("recall", "precision"))), type="l", main = "PR plot of library implemented classifier  - Ionosphere dataset")
+
+PR_BC_scr <- plot(precision ~ recall, t(coords(bc_scr_roc, "all", ret = c("recall", "precision"))), type="l", main = "PR plot of classifier from scratch - BC dataset")
+
+PR_BC_lib <- plot(precision ~ recall, t(coords(bc_lib_roc, "all", ret = c("recall", "precision"))), type="l", main = "PR plot of library implemented classifier - BC dataset")
+```
+
