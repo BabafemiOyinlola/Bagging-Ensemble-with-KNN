@@ -1,3 +1,4 @@
+import time
 from KNN import *
 from metrics import *
 from preprocess import *
@@ -290,11 +291,11 @@ for i in range(2, 21):
 
     specificity.append(round(specif, 3))
 
-# lib_metrics_obtained = [accuracies, precisions, recalls, errors, fs, specificity]
-# write_to_csv(lib_metrics_obtained, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-Lib-K=6")
-# #==================================================================================================================================#
-# #==================================================================================================================================#
+lib_metrics_obtained = [accuracies, precisions, recalls, errors, fs, specificity]
+write_to_csv(lib_metrics_obtained, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-Lib-K=6")
 
+# #==================================================================================================================================#
+# #==================================================================================================================================#
 
 
 #===================================================K-FOLD CROSS VALIDATION========================================================#
@@ -303,26 +304,84 @@ ionosphere_data = preprocess.read_csv("/Users/oyinlola/Desktop/MSc Data Science/
 breast_cancer_data = preprocess.read_breast_cancer_data("/Users/oyinlola/Desktop/MSc Data Science/SCC461 - Programming for Data Scientists/Final Project/breast-cancer-wisconsin.csv", False)
 
 # for Scratch Ionosphere, best K=2, n_estimators=3
-Iono_metrics_scratch = metrics.k_foldcross_validation(ionosphere_data, -1, 2, 3, 30)
-write_to_csv(Iono_metrics_scratch, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Ionosphere-scratch-K=2 n_est=3")
+Iono_metrics_scratch = metrics.k_foldcross_validation(ionosphere_data, -1, 2, 3, 10)
+write_to_csv(Iono_metrics_scratch, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Ionosphere-scratch-K=2 n_est=3 CV=10")
 
 # for Lib Ionosphere, best K=2, n_estimators=8
 knn_lib_ens = ScikitLearn()
-Iono_metrics_lib = knn_lib_ens.k_foldcross_validation(ionosphere_data, -1, 2, 8, 30)
-write_to_csv(Iono_metrics_lib, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Ionosphere-Lib-K=2, n_est=8")
+Iono_metrics_lib = knn_lib_ens.k_foldcross_validation(ionosphere_data, -1, 2, 8, 10)
+write_to_csv(Iono_metrics_lib, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Ionosphere-Lib-K=2, n_est=8 CV=10")
 
 
-#==================================================================================================================================#
-#==================================================================================================================================#
+# ==================================================================================================================================#
+# ==================================================================================================================================#
 # for Scratch Breast Cancer, best K=12, n_estimators=5
-breast_cancer_metrics_scratch = metrics.k_foldcross_validation(breast_cancer_data, 0, 2, 3, 30)
-write_to_csv(breast_cancer_metrics_scratch, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-scratch-K=12, n_est=5")
+breast_cancer_metrics_scratch = metrics.k_foldcross_validation(breast_cancer_data, 0, 2, 3, 10)
+write_to_csv(breast_cancer_metrics_scratch, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-scratch-K=12, n_est=5 CV=10")
 
 # for Lib Breast Cancer, best K=6, n_estimators=7
 knn_lib_ens = ScikitLearn()
-breast_cancer_metrics_lib = knn_lib_ens.k_foldcross_validation(breast_cancer_data, 0, 6, 7, 30)
-write_to_csv(breast_cancer_metrics_lib, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-Lib-K=6, n_est=7")
+breast_cancer_metrics_lib = knn_lib_ens.k_foldcross_validation(breast_cancer_data, 0, 6, 7, 10)
+write_to_csv(breast_cancer_metrics_lib, ["Accuracy", "Precision", "Recall", "Error", "F-score", "Specificity"], "Breast-Cancer-Lib-K=6, n_est=7 CV=10")
 
-print("Done")
+
+#===================================================ROC Curve Metrics===============================================================#
+#==================================================================================================================================#
+
+#The results obtained are used for plotting the ROC curves in R
+
+
+X_train, y_train, X_test, y_test = preprocess.split_data(ionosphere_data, -1, 0.2)
+X_train = np.array(preprocess.normalise_data(X_train))
+X_test = np.array(preprocess.normalise_data(X_test))
+
+
+knn_ensemble = KNNEnsemble("bagging", 2)
+start_time = time.process_time() 
+knn_ensemble.fit(X_train, y_train)
+voted_pred = knn_ensemble.bagging(X_test, -1, bags=3)
+end_time = time.process_time() - start_time  #computational time
+
+
+knn_lib_ens = ScikitLearn()
+start_time2 = time.process_time()
+lib_pred = knn_lib_ens.ensemble(2, X_train, y_train, X_test, bags=8)
+end_time2 = time.process_time() - start_time2 
+
+y_test2 = LabelEncoder().fit_transform(y_test)
+voted_pred2 = LabelEncoder().fit_transform(voted_pred)
+lib_pred2 = LabelEncoder().fit_transform(lib_pred)
+
+
+write_to_csv([voted_pred2, y_test2], ["prediction", "test"], "Ionosphere-Scratch-PR-ROC")
+write_to_csv([lib_pred2,y_test2], ["prediction", "test"], "Ionosphere-Lib-PR-ROC")
+
+
+
+X_train_bc, y_train_bc, X_test_bc, y_test_bc = preprocess.split_data(breast_cancer_data, 0, 0.2)
+X_train_bc = np.array(preprocess.normalise_data(X_train_bc))
+X_test_bc = np.array(preprocess.normalise_data(X_test_bc))
+
+knn_ensemble = KNNEnsemble("bagging", 2)
+start_time_bc = time.process_time()
+knn_ensemble.fit(X_train_bc, y_train_bc)
+voted_pred_bc = knn_ensemble.bagging(X_test_bc, -1, bags=3)
+end_time_bc = time.process_time() - start_time_bc 
+
+knn_lib_ens = ScikitLearn()
+start_time_bc2 = time.process_time()
+lib_pred_bc = knn_lib_ens.ensemble(2, X_train_bc, y_train_bc, X_test_bc, bags=8)
+end_time_bc2 = time.process_time() - start_time_bc2
+
+y_test_bc = LabelEncoder().fit_transform(y_test_bc)
+voted_pred_bc = LabelEncoder().fit_transform(voted_pred_bc)
+lib_pred_bc = LabelEncoder().fit_transform(lib_pred_bc)
+
+
+write_to_csv([voted_pred_bc, y_test_bc], ["prediction", "test"], "Breast Cancer-Scratch-PR-ROC")
+write_to_csv([lib_pred_bc, y_test_bc], ["prediction", "test"], "Breast Cancer-Lib-PR-ROC")
+
+
+
 
 

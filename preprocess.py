@@ -65,6 +65,7 @@ class Preprocess:
 
         return(X_train, y_train, X_test, y_test)
 
+    #label_pos is the location of the label column. 0 for first column and -1 for last column
     def seprate_feat_label(self, train, test, label_pos):
         X_train, y_train, X_test, y_test = [], [], [], []
 

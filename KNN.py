@@ -143,30 +143,3 @@ class KNNEnsemble(KNN):
             voted_predictions.append(label)
 
         return voted_predictions
-
-        
-    
-    
-
-            
-
-
-
-
-
-# KNN = KNN(6)
-# # X_train = [[7, 8, 9], [4, 4, 4],[2, 2, 2]]
-# # y_train = ['a', 'b', 'c']
-# # X_test = [[5, 5, 5], [9, 7, 5]]
-
-# X_train = [[5.1,3.5,1.4,0.2], [4.9,3.0,1.4,0.2],[4.7,3.2,1.3,0.2],
-#             [7.0,3.2,4.7,1.4],[6.4,3.2,4.5,1.5],[6.9,3.1,4.9,1.5],
-#             [6.3,3.3,6.0,2.5],[5.8,2.7,5.1,1.9],[7.1,3.0,5.9,2.1],
-#             [5.2,2.7,3.9,1.4], [4.9,3.0,1.4,0.2],[4.7,3.2,1.3,0.2]]
-# y_train = ['setosa', 'setosa', 'setosa', 'versicolor', 'versicolor', 'versicolor', 'virginica', 'virginica', 'virginica', 'versicolor', 'versicolor',
-#             'setosa']
-# X_test = [[5.2,2.7,3.9,1.4], [4.4,3.0,1.3,0.2]]
-
-# KNN.fit(X_train, y_train)
-# y_pred = KNN.predict(X_test)
-# print("Done")
