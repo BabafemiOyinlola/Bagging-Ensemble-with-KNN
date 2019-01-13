@@ -9,7 +9,7 @@ from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 
 class ScikitLearn:
     def KNNClassifier(self, k, X_train, y_train, X_test):      
-        y_train = LabelEncoder().fit_transform(y_train)
+        y_train = LabelEncoder().fit_transform(y_train) #encode for ease
         X_train = np.array(X_train)
 
         knn = KNeighborsClassifier(k)
@@ -31,7 +31,7 @@ class ScikitLearn:
         return(accuracy, conf_matrix, pre, rec, fscor)
 
     def metrics_ens(self, y_pred, y_test):
-        y_test = LabelEncoder().fit_transform(y_test)
+        y_test = LabelEncoder().fit_transform(y_test) #encode for ease
         y_pred = LabelEncoder().fit_transform(y_pred)
         accuracy = round(accuracy_score(y_test, y_pred), 2)
         conf_matrix = confusion_matrix(y_test, y_pred) 
@@ -39,7 +39,7 @@ class ScikitLearn:
         return(accuracy, conf_matrix, pre)
 
     def k_foldcross_validation(self, data, label_pos, K, n_est, n=10):
-        k_fold = KFold(n_splits=n, shuffle=True, random_state=0)
+        k_fold = KFold(n_splits=n, shuffle=True, random_state=0) 
         bag_clf = BaggingClassifier(KNeighborsClassifier(n_neighbors=K), bootstrap=True, n_estimators=n_est)      
 
         features, labels = [], []
